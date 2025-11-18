@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('Mis Juegos - Pixel Shop')}">
+    <link th:href="@{/css/proveedor/mis-juegos.css}" rel="stylesheet">
+</head>
+<body>
+    <nav th:replace="~{fragments/header :: navbar}"></nav>
+    
+    <div class="main-container my-5">
+        <div class="d-flex justify-content-between align-items-center mb-5">
+            <h1 class="display-4 fw-bold">
+                <i class="fas fa-gamepad text-primary me-3"></i>
+                Mis Juegos Publicados
+            </h1>
+            <a th:href="@{/proveedor/publicar}" class="btn btn-primary btn-lg">
+                <i class="fas fa-plus me-2"></i>Publicar Nuevo
+            </a>
+        </div>
+        
+        <!-- Mensajes -->
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        
+        <!-- Grid de juegos -->
+        <div class="row g-4">
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3" th:each="juego : ${juegos}">
+                <div class="card game-card h-100 shadow-sm">
+                    <img th:src="${juego.imagenUrl != null ? juego.imagenUrl : 'https://via.placeholder.com/300x400?text=Pixel+Shop'}" 
+                         class="card-img-top" 
+                         th:alt="${juego.titulo}">
+                    
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title" th:text="${juego.titulo}">Título</h5>
+                        <p class="card-text text-muted small">
+                            <span th:text="${juego.genero}">Género</span>
+                        </p>
+                        <p class="card-text fw-bold text-success mb-2" th:text="${'€' + juego.precio}">€0.00</p>
+                        
+                        <div class="mt-auto">
+                            <span th:if="${juego.activo}" class="badge bg-success w-100 mb-2">
+                                <i class="fas fa-check-circle me-1"></i>Activo
+                            </span>
+                            <span th:unless="${juego.activo}" class="badge bg-danger w-100 mb-2">
+                                <i class="fas fa-times-circle me-1"></i>Inactivo
+                            </span>
+                            
+                            <a th:href="@{/juego/{id}(id=${juego.id})}" class="btn btn-outline-primary btn-sm w-100">
+                                Ver Detalles
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Si no hay juegos -->
+        <div th:if="${juegos.empty}" class="text-center py-5">
+            <i class="fas fa-folder-open fa-5x text-muted mb-4"></i>
+            <h3>No has publicado juegos aún</h3>
+            <p class="text-muted mb-4">¡Empieza a vender tus juegos!</p>
+            <a th:href="@{/proveedor/publicar}" class="btn btn-primary btn-lg">
+                <i class="fas fa-upload me-2"></i>Publicar Primer Juego
+            </a>
+        </div>
+    </div>
+    
+    <footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

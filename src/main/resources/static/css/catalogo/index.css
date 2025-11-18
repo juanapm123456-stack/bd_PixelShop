@@ -1,0 +1,153 @@
+/* Catálogo Index Styles */
+
+.container {
+    animation: fadeIn 0.8s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.display-4 {
+    color: #2d3748;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+    animation: slideInDown 0.6s ease;
+}
+
+@keyframes slideInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fa-fire {
+    animation: flicker 2s infinite alternate;
+}
+
+@keyframes flicker {
+    0% { opacity: 1; }
+    50% { opacity: 0.8; }
+    100% { opacity: 1; }
+}
+
+.game-card {
+    transition: all 0.3s ease;
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+    background: white;
+    animation: fadeInUp 0.6s ease forwards;
+    opacity: 0;
+}
+
+.game-card:nth-child(1) { animation-delay: 0.1s; }
+.game-card:nth-child(2) { animation-delay: 0.2s; }
+.game-card:nth-child(3) { animation-delay: 0.3s; }
+.game-card:nth-child(4) { animation-delay: 0.4s; }
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.game-card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);
+}
+
+.game-card img {
+    height: 300px;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.game-card:hover img {
+    transform: scale(1.1);
+}
+
+.card-title {
+    color: #2d3748;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.card-text {
+    color: #718096;
+    line-height: 1.5;
+}
+
+.text-primary {
+    color: #667eea !important;
+    font-weight: 700;
+}
+
+.btn-outline-primary {
+    border: 2px solid #667eea;
+    color: #667eea;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border-radius: 20px;
+}
+
+.btn-outline-primary:hover {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: transparent;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.badge.bg-success {
+    background: linear-gradient(135deg, #48bb78 0%, #38a169 100%) !important;
+    border-radius: 15px;
+    padding: 8px 12px;
+    font-weight: 500;
+}
+
+/* Empty state */
+.fa-search {
+    color: #cbd5e0;
+    animation: rotate 3s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .game-card img {
+        height: 250px;
+    }
+    
+    .display-4 {
+        font-size: 2rem;
+    }
+}
+
+/* Search highlight */
+.lead strong {
+    color: #667eea;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}

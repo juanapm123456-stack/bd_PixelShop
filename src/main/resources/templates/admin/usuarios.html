@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('Gestión de Usuarios - Pixel Shop')}">
+    <link th:href="@{/css/admin/usuarios.css}" rel="stylesheet">
+</head>
+<body>
+    <nav th:replace="~{fragments/header :: navbar}"></nav>
+    
+    <div class="main-container my-5">
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold">
+                <i class="fas fa-users text-danger me-3"></i>
+                Gestión de Usuarios
+            </h1>
+            <p class="lead text-muted">Administración completa de la plataforma</p>
+        </div>
+        
+        <!-- Mensajes -->
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        
+        <!-- Estadísticas rápidas -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="card bg-primary text-white shadow">
+                    <div class="card-body text-center">
+                        <h3 th:text="${#lists.size(usuarios)}">0</h3>
+                        <p class="mb-0">Total Usuarios</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-success text-white shadow">
+                    <div class="card-body text-center">
+                        <h3 th:text="${#lists.size(usuarios.?[rol.name() == 'CLIENTE'])}">0</h3>
+                        <p class="mb-0">Clientes</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card bg-info text-white shadow">
+                    <div class="card-body text-center">
+                        <h3 th:text="${#lists.size(usuarios.?[rol.name() == 'PROVEEDOR'])}">0</h3>
+                        <p class="mb-0">Proveedores</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tabla de usuarios -->
+        <div class="card shadow">
+            <div class="card-header bg-dark text-white">
+                <h4 class="mb-0"><i class="fas fa-list me-2"></i>Lista de Usuarios</h4>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#ID</th>
+                                <th>Nombre</th>
+                                <th>Email</th>
+                                <th>Rol</th>
+                                <th>Fecha Registro</th>
+                                <th>Estado</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="usuario : ${usuarios}">
+                                <td th:text="${usuario.id}">#1</td>
+                                <td>
+                                    <i class="fas fa-user-circle text-primary me-2"></i>
+                                    <strong th:text="${usuario.nombre}">Nombre</strong>
+                                </td>
+                                <td th:text="${usuario.email}">email@example.com</td>
+                                <td>
+                                    <span th:if="${usuario.rol.name() == 'CLIENTE'}" class="badge bg-success">
+                                        <i class="fas fa-user me-1"></i>Cliente
+                                    </span>
+                                    <span th:if="${usuario.rol.name() == 'PROVEEDOR'}" class="badge bg-info">
+                                        <i class="fas fa-briefcase me-1"></i>Proveedor
+                                    </span>
+                                    <span th:if="${usuario.rol.name() == 'ADMIN'}" class="badge bg-danger">
+                                        <i class="fas fa-crown me-1"></i>Admin
+                                    </span>
+                                </td>
+                                <td th:text="${#temporals.format(usuario.fechaRegistro, 'dd/MM/yyyy')}">01/01/2025</td>
+                                <td>
+                                    <span th:if="${usuario.activo}" class="badge bg-success">Activo</span>
+                                    <span th:unless="${usuario.activo}" class="badge bg-danger">Inactivo</span>
+                                </td>
+                                <td>
+                                    <!-- No permitir eliminar ADMIN -->
+                                    <form th:if="${usuario.rol.name() != 'ADMIN'}" 
+                                          th:action="@{/admin/usuario/eliminar/{id}(id=${usuario.id})}" 
+                                          method="post" 
+                                          class="d-inline"
+                                          onsubmit="return confirm('¿Estás seguro de eliminar este usuario?');">
+                                        <button type="submit" class="btn btn-sm btn-danger">
+                                            <i class="fas fa-trash me-1"></i>Eliminar
+                                        </button>
+                                    </form>
+                                    <span th:if="${usuario.rol.name() == 'ADMIN'}" class="text-muted small">
+                                        <i class="fas fa-shield-alt me-1"></i>Protegido
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

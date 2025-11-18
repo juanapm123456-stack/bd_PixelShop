@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('Mis Ventas - Pixel Shop')}">
+    <link th:href="@{/css/proveedor/ventas.css}" rel="stylesheet">
+</head>
+<body>
+    <nav th:replace="~{fragments/header :: navbar}"></nav>
+    
+    <div class="main-container my-5">
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold">
+                <i class="fas fa-chart-line text-success me-3"></i>
+                Mis Ventas e Ingresos
+            </h1>
+        </div>
+        
+        <!-- Mensajes -->
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        
+        <!-- Resumen de ingresos -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card shadow">
+                    <div class="card-body text-center py-4">
+                        <div class="icon-circle bg-success text-white mb-3 mx-auto">
+                            <i class="fas fa-money-bill-wave fa-2x"></i>
+                        </div>
+                        <h6 class="text-muted mb-2">Ingresos Pendientes</h6>
+                        <h2 class="display-4 fw-bold text-success mb-0" th:text="${'€' + ingresosPendientes}">€0.00</h2>
+                        <small class="text-muted">85% de tus ventas</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tabla de movimientos -->
+        <div class="card shadow">
+            <div class="card-header bg-dark text-white">
+                <h4 class="mb-0"><i class="fas fa-list me-2"></i>Historial de Movimientos</h4>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#ID</th>
+                                <th>Juego Vendido</th>
+                                <th>Comprador</th>
+                                <th>Fecha</th>
+                                <th>Monto Neto (85%)</th>
+                                <th>Estado</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="movimiento : ${movimientos}">
+                                <td th:text="${movimiento.id}">#1</td>
+                                <td><strong th:text="${movimiento.compra.juego.titulo}">Juego</strong></td>
+                                <td th:text="${movimiento.compra.usuario.nombre}">Usuario</td>
+                                <td th:text="${#temporals.format(movimiento.fecha, 'dd/MM/yyyy')}">01/01/2025</td>
+                                <td class="fw-bold text-success" th:text="${'€' + movimiento.montoNeto}">€0.00</td>
+                                <td>
+                                    <span th:if="${movimiento.pagado}" class="badge bg-success">
+                                        <i class="fas fa-check me-1"></i>Cobrado
+                                    </span>
+                                    <span th:unless="${movimiento.pagado}" class="badge bg-warning">
+                                        <i class="fas fa-clock me-1"></i>Pendiente
+                                    </span>
+                                </td>
+                                <td>
+                                    <form th:if="${!movimiento.pagado}" 
+                                          th:action="@{/proveedor/cobrar/{id}(id=${movimiento.id})}" 
+                                          method="post" class="d-inline">
+                                        <button type="submit" class="btn btn-sm btn-success">
+                                            <i class="fas fa-money-bill-wave me-1"></i>Cobrar
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Si no hay movimientos -->
+        <div th:if="${movimientos.empty}" class="text-center py-5">
+            <i class="fas fa-chart-line fa-5x text-muted mb-4"></i>
+            <h3>No tienes ventas aún</h3>
+            <p class="text-muted">Tus ventas aparecerán aquí</p>
+        </div>
+    </div>
+    
+    <footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

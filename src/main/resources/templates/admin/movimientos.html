@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('Movimientos Globales - Pixel Shop')}">
+    <link th:href="@{/css/admin/movimientos.css}" rel="stylesheet">
+</head>
+<body>
+    <nav th:replace="~{fragments/header :: navbar}"></nav>
+    
+    <div class="main-container my-5">
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold">
+                <i class="fas fa-exchange-alt text-warning me-3"></i>
+                Movimientos Globales
+            </h1>
+            <p class="lead text-muted">Todas las transacciones de la plataforma</p>
+        </div>
+        
+        <!-- Tabla de compras/movimientos -->
+        <div class="card shadow">
+            <div class="card-header bg-dark text-white">
+                <h4 class="mb-0"><i class="fas fa-list me-2"></i>Historial de Compras</h4>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>#ID</th>
+                                <th>Cliente</th>
+                                <th>Juego</th>
+                                <th>Proveedor</th>
+                                <th>Fecha</th>
+                                <th>Precio</th>
+                                <th>Comisión (15%)</th>
+                                <th>Estado Pago</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="compra : ${compras}">
+                                <td th:text="${compra.id}">#1</td>
+                                <td>
+                                    <i class="fas fa-user text-primary me-1"></i>
+                                    <span th:text="${compra.usuario.nombre}">Cliente</span>
+                                </td>
+                                <td>
+                                    <strong th:text="${compra.juego.titulo}">Juego</strong>
+                                </td>
+                                <td>
+                                    <i class="fas fa-briefcase text-info me-1"></i>
+                                    <span th:text="${compra.juego.proveedor.nombre}">Proveedor</span>
+                                </td>
+                                <td th:text="${#temporals.format(compra.fechaCompra, 'dd/MM/yyyy HH:mm')}">01/01/2025</td>
+                                <td class="fw-bold" th:text="${'€' + compra.precioPagado}">€0.00</td>
+                                <td class="text-success fw-bold" th:text="${'€' + (compra.precioPagado * 0.15)}">€0.00</td>
+                                <td>
+                                    <span th:if="${compra.pagadoAlProveedor}" class="badge bg-success">
+                                        <i class="fas fa-check me-1"></i>Pagado
+                                    </span>
+                                    <span th:unless="${compra.pagadoAlProveedor}" class="badge bg-warning">
+                                        <i class="fas fa-clock me-1"></i>Pendiente
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Si no hay movimientos -->
+        <div th:if="${compras.empty}" class="text-center py-5">
+            <i class="fas fa-exchange-alt fa-5x text-muted mb-4"></i>
+            <h3>No hay movimientos registrados</h3>
+            <p class="text-muted">Las transacciones aparecerán aquí</p>
+        </div>
+    </div>
+    
+    <footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

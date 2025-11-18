@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('Mi Biblioteca - Pixel Shop')}">
+    <link th:href="@{/css/usuario/mi-biblioteca.css}" rel="stylesheet">
+</head>
+<body>
+    <nav th:replace="~{fragments/header :: navbar}"></nav>
+    
+    <div class="main-container my-5">
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold">
+                <i class="fas fa-book text-primary me-3"></i>
+                Mi Biblioteca
+            </h1>
+            <p class="lead text-muted">Tus juegos comprados</p>
+        </div>
+        
+        <!-- Grid de juegos -->
+        <div class="row g-4">
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3" th:each="item : ${biblioteca}">
+                <div class="card game-card h-100 shadow-sm">
+                    <img th:src="${item.juego.imagenUrl != null ? item.juego.imagenUrl : 'https://via.placeholder.com/300x400?text=Pixel+Shop'}" 
+                         class="card-img-top" 
+                         th:alt="${item.juego.titulo}">
+                    
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title" th:text="${item.juego.titulo}">Título</h5>
+                        <p class="card-text text-muted small">
+                            Adquirido: <span th:text="${#temporals.format(item.fechaAdquisicion, 'dd/MM/yyyy')}"></span>
+                        </p>
+                        
+                        <a th:href="@{/juego/{id}(id=${item.juego.id})}" class="btn btn-outline-primary btn-sm mt-auto">
+                            Ver Detalles
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Si la biblioteca está vacía -->
+        <div th:if="${biblioteca.empty}" class="text-center py-5">
+            <i class="fas fa-folder-open fa-5x text-muted mb-4"></i>
+            <h3>Tu biblioteca está vacía</h3>
+            <p class="text-muted mb-4">¡Empieza a comprar juegos!</p>
+            <a th:href="@{/}" class="btn btn-primary btn-lg">
+                <i class="fas fa-shopping-cart me-2"></i>Ir al Catálogo
+            </a>
+        </div>
+    </div>
+    
+    <footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('Publicar Juego - Pixel Shop')}">
+    <link th:href="@{/css/proveedor/publicar-juego.css}" rel="stylesheet">
+</head>
+<body>
+    <nav th:replace="~{fragments/header :: navbar}"></nav>
+    
+    <div class="main-container my-5">
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <div class="card shadow">
+                    <div class="card-header bg-gradient text-white text-center py-4" 
+                         style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <i class="fas fa-upload fa-3x mb-3"></i>
+                        <h2 class="mb-0">Publicar Nuevo Juego</h2>
+                        <p class="mb-0">Costo de publicación: <strong>25€</strong></p>
+                    </div>
+                    
+                    <div class="card-body p-5">
+                        <form th:action="@{/proveedor/publicar}" th:object="${juego}" method="post">
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <label class="form-label fw-bold">Título del Juego *</label>
+                                    <input type="text" th:field="*{titulo}" class="form-control form-control-lg" 
+                                           placeholder="Ej: Cyberpunk 2077" required>
+                                </div>
+                                
+                                <div class="col-md-6 mb-4">
+                                    <label class="form-label fw-bold">Precio (€) *</label>
+                                    <input type="number" th:field="*{precio}" class="form-control form-control-lg" 
+                                           placeholder="29.99" step="0.01" min="0.01" required>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Descripción *</label>
+                                <textarea th:field="*{descripcion}" class="form-control" rows="5" 
+                                          placeholder="Describe tu juego: historia, mecánicas, características..." required></textarea>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <label class="form-label fw-bold">Género</label>
+                                    <select th:field="*{genero}" class="form-select form-select-lg">
+                                        <option value="">Selecciona...</option>
+                                        <option value="Acción">Acción</option>
+                                        <option value="Aventura">Aventura</option>
+                                        <option value="RPG">RPG</option>
+                                        <option value="Estrategia">Estrategia</option>
+                                        <option value="Deportes">Deportes</option>
+                                        <option value="Simulación">Simulación</option>
+                                        <option value="Terror">Terror</option>
+                                        <option value="Indie">Indie</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="col-md-6 mb-4">
+                                    <label class="form-label fw-bold">URL de la Imagen (Portada)</label>
+                                    <input type="url" th:field="*{imagenUrl}" class="form-control form-control-lg" 
+                                           placeholder="https://ejemplo.com/imagen.jpg">
+                                    <small class="text-muted">Link directo a la imagen de portada</small>
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-warning">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Importante:</strong> Al publicar se te cobrará una tarifa única de <strong>25€</strong>. 
+                                Recibirás el <strong>85%</strong> de cada venta realizada.
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    <i class="fas fa-check me-2"></i>Publicar Juego (25€)
+                                </button>
+                                <a th:href="@{/proveedor/mis-juegos}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times me-2"></i>Cancelar
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

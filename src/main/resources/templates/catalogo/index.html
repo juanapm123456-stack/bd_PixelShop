@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/header :: head('Catálogo - Pixel Shop')}">
+    <link th:href="@{/css/catalogo/index.css}" rel="stylesheet">
+</head>
+<body>
+    <nav th:replace="~{fragments/header :: navbar}"></nav>
+    
+    <div class="catalog-container my-5">
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold">
+                <i class="fas fa-fire text-danger me-3"></i>
+                Catálogo de Juegos
+            </h1>
+            <p class="lead text-muted" th:if="${busqueda}">
+                Resultados para: <strong th:text="${busqueda}"></strong>
+            </p>
+        </div>
+        
+        <!-- Grid de juegos -->
+        <div class="row g-4">
+            <div class="col-12 col-sm-6 col-md-4 col-lg-3" th:each="juego : ${juegos}">
+                <div class="card game-card h-100 shadow-sm">
+                    <img th:src="${juego.imagenUrl != null ? juego.imagenUrl : 'https://via.placeholder.com/300x400?text=Pixel+Shop'}" 
+                         class="card-img-top" 
+                         th:alt="${juego.titulo}">
+                    
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title" th:text="${juego.titulo}">Título del Juego</h5>
+                        <p class="card-text text-muted small flex-grow-1" th:text="${#strings.abbreviate(juego.descripcion, 80)}">Descripción...</p>
+                        
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="h5 mb-0 text-primary fw-bold" th:text="${'€' + juego.precio}">€0.00</span>
+                            
+                            <!-- Botón Ver Detalles -->
+                            <a th:href="@{/juego/{id}(id=${juego.id})}" class="btn btn-outline-primary btn-sm">
+                                Ver Detalles
+                            </a>
+                        </div>
+                        
+                        <!-- Badge si ya lo tiene -->
+                        <div th:if="${juegosComprados != null && juegosComprados.contains(juego.id)}" 
+                             class="mt-2">
+                            <span class="badge bg-success w-100">
+                                <i class="fas fa-check me-1"></i>En tu biblioteca
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Si no hay juegos -->
+        <div th:if="${juegos.empty}" class="text-center py-5">
+            <i class="fas fa-search fa-5x text-muted mb-4"></i>
+            <h3>No se encontraron juegos</h3>
+            <p class="text-muted">Intenta con otra búsqueda</p>
+        </div>
+    </div>
+    
+    <footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>
