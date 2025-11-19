@@ -20,6 +20,10 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/login", "/register", "/css/**", "/js/**", "/images/**", "/static/**").permitAll()
                 .requestMatchers("/", "/juego/**", "/buscar").authenticated()
+                // ✅ CRÍTICO: Solo CLIENTE y PROVEEDOR pueden comprar
+                .requestMatchers("/compra/**").hasAnyRole("CLIENTE", "PROVEEDOR")
+                .requestMatchers("/mi-biblioteca").hasAnyRole("CLIENTE", "PROVEEDOR")
+                .requestMatchers("/perfil").authenticated()
                 .requestMatchers("/proveedor/**").hasAnyRole("PROVEEDOR", "ADMIN")
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()

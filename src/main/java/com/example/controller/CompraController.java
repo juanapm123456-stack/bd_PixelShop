@@ -43,6 +43,12 @@ public class CompraController {
         Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername())
             .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         
+        // ✅ VALIDACIÓN CRÍTICA: ADMIN NO PUEDE COMPRAR
+        if (usuario.getRol() == Rol.ADMIN) {
+            redirectAttributes.addFlashAttribute("error", "Los administradores no pueden comprar juegos");
+            return "redirect:/juego/" + juegoId;
+        }
+        
         Juego juego = juegoRepository.findById(juegoId)
             .orElseThrow(() -> new RuntimeException("Juego no encontrado"));
         

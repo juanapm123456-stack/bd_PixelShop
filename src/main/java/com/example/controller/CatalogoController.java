@@ -34,10 +34,10 @@ public class CatalogoController {
         List<Juego> juegos = juegoRepository.findByActivoTrue();
         model.addAttribute("juegos", juegos);
         
-        // Si hay usuario logueado, obtener sus juegos comprados
+        // Si hay usuario logueado, obtener sus juegos comprados (solo CLIENTE y PROVEEDOR)
         if (userDetails != null) {
             Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername()).orElse(null);
-            if (usuario != null) {
+            if (usuario != null && usuario.getRol() != com.example.model.Rol.ADMIN) {
                 List<Compra> compras = compraRepository.findByUsuarioOrderByFechaCompraDesc(usuario);
                 List<Long> juegosCompradosIds = compras.stream()
                     .map(c -> c.getJuego().getId())
@@ -57,11 +57,15 @@ public class CatalogoController {
         
         model.addAttribute("juego", juego);
         
-        // Verificar si el usuario ya compró este juego
+        // Verificar si el usuario ya compró este juego (solo para CLIENTE y PROVEEDOR)
         if (userDetails != null) {
             Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername()).orElse(null);
             if (usuario != null) {
-                boolean yaComprado = compraRepository.existsByUsuarioAndJuego(usuario, juego);
+                // Los ADMIN nunca pueden "haber comprado" porque no pueden comprar
+                boolean yaComprado = false;
+                if (usuario.getRol() != com.example.model.Rol.ADMIN) {
+                    yaComprado = compraRepository.existsByUsuarioAndJuego(usuario, juego);
+                }
                 model.addAttribute("yaComprado", yaComprado);
             }
         }

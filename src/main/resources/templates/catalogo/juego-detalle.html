@@ -35,23 +35,34 @@
                 </div>
                 
                 <!-- Botones de acción -->
-                <!-- Si NO lo ha comprado -->
-                <div th:if="${!yaComprado}">
-                    <form th:action="@{/compra/{id}(id=${juego.id})}" method="post">
-                        <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
-                            <i class="fas fa-shopping-cart me-2"></i>Comprar Ahora
+                <!-- Solo CLIENTE y PROVEEDOR pueden comprar -->
+                <div sec:authorize="hasAnyRole('CLIENTE', 'PROVEEDOR')">
+                    <!-- Si NO lo ha comprado -->
+                    <div th:if="${!yaComprado}">
+                        <form th:action="@{/compra/{id}(id=${juego.id})}" method="post">
+                            <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
+                                <i class="fas fa-shopping-cart me-2"></i>Comprar Ahora
+                            </button>
+                        </form>
+                    </div>
+                    
+                    <!-- Si YA lo compró -->
+                    <div th:if="${yaComprado}">
+                        <button class="btn btn-success btn-lg w-100 mb-3" disabled>
+                            <i class="fas fa-check-circle me-2"></i>Ya tienes este juego
                         </button>
-                    </form>
+                        <a th:href="@{/mi-biblioteca}" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-book me-2"></i>Ir a Mi Biblioteca
+                        </a>
+                    </div>
                 </div>
                 
-                <!-- Si YA lo compró -->
-                <div th:if="${yaComprado}">
-                    <button class="btn btn-success btn-lg w-100 mb-3" disabled>
-                        <i class="fas fa-check-circle me-2"></i>Ya tienes este juego
-                    </button>
-                    <a th:href="@{/mi-biblioteca}" class="btn btn-outline-primary w-100">
-                        <i class="fas fa-book me-2"></i>Ir a Mi Biblioteca
-                    </a>
+                <!-- Mensaje para ADMIN -->
+                <div sec:authorize="hasRole('ADMIN')">
+                    <div class="alert alert-warning text-center">
+                        <i class="fas fa-shield-alt me-2"></i>
+                        <strong>Los administradores no pueden comprar juegos</strong>
+                    </div>
                 </div>
                 
                 <a th:href="@{/}" class="btn btn-outline-secondary w-100 mt-2">
