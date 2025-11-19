@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head('Editar Juego - Pixel Shop')}">
+    <link th:href="@{/css/proveedor/editar-juego.css}" rel="stylesheet">
+</head>
+<body>
+    <nav th:replace="~{fragments/header :: navbar}"></nav>
+    
+    <div class="main-container my-5">
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <div class="card shadow">
+                    <div class="card-header bg-warning text-dark text-center py-4">
+                        <i class="fas fa-edit fa-3x mb-3"></i>
+                        <h2 class="mb-0">Editar Juego</h2>
+                    </div>
+                    
+                    <div class="card-body p-5">
+                        <!-- Mensajes -->
+                        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+                        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+                        
+                        <!-- Información de límites -->
+                        <div class="alert alert-info mb-4">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Límites de imágenes:</strong> Máx 10MB por imagen | Dimensiones: 200x200px - 3000x3000px | Formatos: JPG, PNG, WEBP
+                        </div>
+                        
+                        <form th:action="@{/proveedor/editar/{id}(id=${juego.id})}" th:object="${juego}" method="post" enctype="multipart/form-data">
+                            <!-- Título (NO editable) -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Título del Juego</label>
+                                <input type="text" th:value="${juego.titulo}" class="form-control" disabled>
+                                <small class="text-muted">El título no se puede cambiar</small>
+                            </div>
+                            
+                            <!-- Descripción (editable) -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Descripción *</label>
+                                <textarea th:field="*{descripcion}" class="form-control" rows="5" required></textarea>
+                            </div>
+                            
+                            <!-- Precio (NO editable) -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Precio</label>
+                                <input type="text" th:value="${juego.precio + '€'}" class="form-control" disabled>
+                                <small class="text-muted">El precio no se puede cambiar</small>
+                            </div>
+                            
+                            <!-- Imagen 1 (editable - mostrar actual) -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Imagen 1 (Portada)</label>
+                                <div class="mb-2" th:if="${juego.imagenUrl1}">
+                                    <img th:src="@{${juego.imagenUrl1}}" class="img-thumbnail" style="max-height: 200px;">
+                                </div>
+                                <input type="file" name="imagen1" class="form-control" accept="image/jpeg,image/png,image/webp">
+                                <small class="text-muted">Dejar vacío para mantener la imagen actual</small>
+                            </div>
+                            
+                            <!-- Imagen 2 -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Imagen 2</label>
+                                <div class="mb-2" th:if="${juego.imagenUrl2}">
+                                    <img th:src="@{${juego.imagenUrl2}}" class="img-thumbnail" style="max-height: 200px;">
+                                </div>
+                                <input type="file" name="imagen2" class="form-control" accept="image/jpeg,image/png,image/webp">
+                                <small class="text-muted">Dejar vacío para mantener la imagen actual</small>
+                            </div>
+                            
+                            <!-- Imagen 3 -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Imagen 3 (Captura 2)</label>
+                                <div class="mb-2" th:if="${juego.imagenUrl3}">
+                                    <img th:src="@{${juego.imagenUrl3}}" class="img-thumbnail" style="max-height: 200px;">
+                                </div>
+                                <input type="file" name="imagen3" class="form-control" accept="image/jpeg,image/png,image/webp">
+                                <small class="text-muted">Dejar vacío para mantener la imagen actual</small>
+                            </div>
+                            
+                            <!-- Imagen 4 -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Imagen 4 (Captura 3)</label>
+                                <div class="mb-2" th:if="${juego.imagenUrl4}">
+                                    <img th:src="@{${juego.imagenUrl4}}" class="img-thumbnail" style="max-height: 200px;">
+                                </div>
+                                <input type="file" name="imagen4" class="form-control" accept="image/jpeg,image/png,image/webp">
+                                <small class="text-muted">Dejar vacío para mantener la imagen actual</small>
+                            </div>
+                            
+                            <!-- Video YouTube (editable) -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Video de YouTube</label>
+                                <input type="url" th:field="*{videoYoutubeUrl}" class="form-control" placeholder="https://www.youtube.com/watch?v=...">
+                                <small class="text-muted">Opcional</small>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-warning btn-lg">
+                                    <i class="fas fa-save me-2"></i>Guardar Cambios
+                                </button>
+                                <a th:href="@{/proveedor/mis-juegos}" class="btn btn-outline-secondary">
+                                    <i class="fas fa-times me-2"></i>Cancelar
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

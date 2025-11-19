@@ -131,16 +131,26 @@ public class DataSeeder implements CommandLineRunner {
             new Object[]{"Red Dead Redemption 2", "Western épico con mundo abierto, historia profunda y atención al detalle excepcional.", "59.99", "Aventura", "https://via.placeholder.com/300x400/764ba2/ffffff?text=Red+Dead+2", proveedor1}
         );
         
+        int i = 0;
         for (Object[] data : juegosData) {
             Juego juego = new Juego();
-            juego.setTitulo((String) data[0]);
+            String titulo = (String) data[0];
+            juego.setTitulo(titulo);
             juego.setDescripcion((String) data[1]);
             juego.setPrecio(new BigDecimal((String) data[2]));
             juego.setGenero((String) data[3]);
-            juego.setImagenUrl((String) data[4]);
+            
+            // Establecer URLs de imágenes y video
+            juego.setImagenUrl1("https://via.placeholder.com/800x1200/667eea/ffffff?text=Portada+" + (i+1));
+            juego.setImagenUrl2("https://via.placeholder.com/1920x1080/764ba2/ffffff?text=Captura+1+" + (i+1));
+            juego.setImagenUrl3("https://via.placeholder.com/1920x1080/f093fb/ffffff?text=Captura+2+" + (i+1));
+            juego.setImagenUrl4("https://via.placeholder.com/1920x1080/28a745/ffffff?text=Captura+3+" + (i+1));
+            juego.setVideoYoutubeUrl("https://www.youtube.com/watch?v=dQw4w9WgXcQ"); // Video placeholder
+            
             juego.setProveedor((Usuario) data[5]);
             juego.setActivo(true);
             juegoRepository.save(juego);
+            i++;
         }
     }
     
@@ -180,6 +190,12 @@ public class DataSeeder implements CommandLineRunner {
     }
     
     private void crearCompra(Usuario usuario, Juego juego) {
+        // VALIDACIÓN: Los administradores NO pueden comprar
+        if (usuario.getRol() == Rol.ADMIN) {
+            System.out.println("⚠️ ADVERTENCIA: Intento de crear compra para ADMIN - BLOQUEADO");
+            return;
+        }
+        
         // Crear compra
         Compra compra = new Compra();
         compra.setUsuario(usuario);

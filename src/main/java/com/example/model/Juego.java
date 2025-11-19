@@ -33,8 +33,22 @@ public class Juego {
     @Column(nullable = false)
     private Boolean activo = true;
     
-    @Column(name = "imagen_url", length = 500)
-    private String imagenUrl;
+    // CAMPOS PARA IMÁGENES
+    @Column(name = "imagen_url_1", length = 500)
+    private String imagenUrl1; // Portada principal (solo para catálogo)
+    
+    @Column(name = "imagen_url_2", length = 500)
+    private String imagenUrl2; // Captura 1 (para detalle)
+    
+    @Column(name = "imagen_url_3", length = 500)
+    private String imagenUrl3; // Captura 2 (para detalle)
+    
+    @Column(name = "imagen_url_4", length = 500)
+    private String imagenUrl4; // Captura 3 (para detalle)
+    
+    // NUEVO CAMPO PARA VIDEO
+    @Column(name = "video_youtube_url", length = 500)
+    private String videoYoutubeUrl; // URL de YouTube
     
     @Column(length = 100)
     private String genero;
@@ -60,9 +74,9 @@ public class Juego {
         this.activo = true;
     }
     
-    public Juego(String titulo, String descripcion, BigDecimal precio, Usuario proveedor, String imagenUrl, String genero) {
+    public Juego(String titulo, String descripcion, BigDecimal precio, Usuario proveedor, String imagenUrl1, String genero) {
         this(titulo, descripcion, precio, proveedor);
-        this.imagenUrl = imagenUrl;
+        this.imagenUrl1 = imagenUrl1;
         this.genero = genero;
     }
     
@@ -134,12 +148,44 @@ public class Juego {
         this.activo = activo;
     }
     
-    public String getImagenUrl() {
-        return imagenUrl;
+    public String getImagenUrl1() {
+        return imagenUrl1;
     }
     
-    public void setImagenUrl(String imagenUrl) {
-        this.imagenUrl = imagenUrl;
+    public void setImagenUrl1(String imagenUrl1) {
+        this.imagenUrl1 = imagenUrl1;
+    }
+    
+    public String getImagenUrl2() {
+        return imagenUrl2;
+    }
+    
+    public void setImagenUrl2(String imagenUrl2) {
+        this.imagenUrl2 = imagenUrl2;
+    }
+    
+    public String getImagenUrl3() {
+        return imagenUrl3;
+    }
+    
+    public void setImagenUrl3(String imagenUrl3) {
+        this.imagenUrl3 = imagenUrl3;
+    }
+    
+    public String getImagenUrl4() {
+        return imagenUrl4;
+    }
+    
+    public void setImagenUrl4(String imagenUrl4) {
+        this.imagenUrl4 = imagenUrl4;
+    }
+    
+    public String getVideoYoutubeUrl() {
+        return videoYoutubeUrl;
+    }
+    
+    public void setVideoYoutubeUrl(String videoYoutubeUrl) {
+        this.videoYoutubeUrl = videoYoutubeUrl;
     }
     
     public String getGenero() {

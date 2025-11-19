@@ -50,8 +50,8 @@
                                     <span th:text="${compra.juego.proveedor.nombre}">Proveedor</span>
                                 </td>
                                 <td th:text="${#temporals.format(compra.fechaCompra, 'dd/MM/yyyy HH:mm')}">01/01/2025</td>
-                                <td class="fw-bold" th:text="${'€' + compra.precioPagado}">€0.00</td>
-                                <td class="text-success fw-bold" th:text="${'€' + (compra.precioPagado * 0.15)}">€0.00</td>
+                                <td class="fw-bold" th:text="${compra.precioPagado + '€'}">0.00€</td>
+                                <td class="text-success fw-bold" th:text="${(compra.precioPagado * 0.15) + '€'}">0.00€</td>
                                 <td>
                                     <span th:if="${compra.pagadoAlProveedor}" class="badge bg-success">
                                         <i class="fas fa-check me-1"></i>Pagado

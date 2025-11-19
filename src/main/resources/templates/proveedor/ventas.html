@@ -26,7 +26,7 @@
                             <i class="fas fa-money-bill-wave fa-2x"></i>
                         </div>
                         <h6 class="text-muted mb-2">Ingresos Pendientes</h6>
-                        <h2 class="display-4 fw-bold text-success mb-0" th:text="${'€' + ingresosPendientes}">€0.00</h2>
+                        <h2 class="display-4 fw-bold text-success mb-0" th:text="${ingresosPendientes + '€'}">0.00€</h2>
                         <small class="text-muted">85% de tus ventas</small>
                     </div>
                 </div>
@@ -58,7 +58,7 @@
                                 <td><strong th:text="${movimiento.compra.juego.titulo}">Juego</strong></td>
                                 <td th:text="${movimiento.compra.usuario.nombre}">Usuario</td>
                                 <td th:text="${#temporals.format(movimiento.fecha, 'dd/MM/yyyy')}">01/01/2025</td>
-                                <td class="fw-bold text-success" th:text="${'€' + movimiento.montoNeto}">€0.00</td>
+                                <td class="fw-bold text-success" th:text="${movimiento.montoNeto + '€'}">0.00€</td>
                                 <td>
                                     <span th:if="${movimiento.pagado}" class="badge bg-success">
                                         <i class="fas fa-check me-1"></i>Cobrado

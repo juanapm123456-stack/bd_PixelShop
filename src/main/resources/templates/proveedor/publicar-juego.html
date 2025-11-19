@@ -18,7 +18,7 @@
                     </div>
                     
                     <div class="card-body p-5">
-                        <form th:action="@{/proveedor/publicar}" th:object="${juego}" method="post">
+                        <form th:action="@{/proveedor/publicar}" th:object="${juego}" method="post" enctype="multipart/form-data">
                             <div class="row">
                                 <div class="col-md-6 mb-4">
                                     <label class="form-label fw-bold">Título del Juego *</label>
@@ -39,28 +39,63 @@
                                           placeholder="Describe tu juego: historia, mecánicas, características..." required></textarea>
                             </div>
                             
-                            <div class="row">
-                                <div class="col-md-6 mb-4">
-                                    <label class="form-label fw-bold">Género</label>
-                                    <select th:field="*{genero}" class="form-select form-select-lg">
-                                        <option value="">Selecciona...</option>
-                                        <option value="Acción">Acción</option>
-                                        <option value="Aventura">Aventura</option>
-                                        <option value="RPG">RPG</option>
-                                        <option value="Estrategia">Estrategia</option>
-                                        <option value="Deportes">Deportes</option>
-                                        <option value="Simulación">Simulación</option>
-                                        <option value="Terror">Terror</option>
-                                        <option value="Indie">Indie</option>
-                                    </select>
-                                </div>
-                                
-                                <div class="col-md-6 mb-4">
-                                    <label class="form-label fw-bold">URL de la Imagen (Portada)</label>
-                                    <input type="url" th:field="*{imagenUrl}" class="form-control form-control-lg" 
-                                           placeholder="https://ejemplo.com/imagen.jpg">
-                                    <small class="text-muted">Link directo a la imagen de portada</small>
-                                </div>
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Género</label>
+                                <select th:field="*{genero}" class="form-select form-select-lg">
+                                    <option value="">Selecciona...</option>
+                                    <option value="Acción">Acción</option>
+                                    <option value="Aventura">Aventura</option>
+                                    <option value="RPG">RPG</option>
+                                    <option value="Estrategia">Estrategia</option>
+                                    <option value="Deportes">Deportes</option>
+                                    <option value="Simulación">Simulación</option>
+                                    <option value="Terror">Terror</option>
+                                    <option value="Indie">Indie</option>
+                                </select>
+                            </div>
+                            
+                            <!-- SUBIR IMÁGENES DESDE PC -->
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Requisitos de imágenes:</strong>
+                                <ul class="mb-0 mt-2">
+                                    <li><strong>Formatos:</strong> JPG, PNG, WEBP</li>
+                                    <li><strong>Tamaño máximo:</strong> 10MB por imagen</li>
+                                    <li><strong>Dimensiones recomendadas:</strong> 200x200px mínimo, 3000x3000px máximo</li>
+                                    <li><strong>Portada:</strong> Formato vertical (ej: 800x1200px) - Solo para catálogo</li>
+                                    <li><strong>Capturas:</strong> Formato horizontal (ej: 1920x1080px) - Para galería del detalle</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Imagen 1 (Portada principal) *</label>
+                                <input type="file" name="imagen1" class="form-control" accept="image/jpeg,image/png,image/webp" required>
+                                <small class="text-muted">🖼️ Portada vertical para catálogo - Máx 10MB</small>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Imagen 2 (Captura 1) *</label>
+                                <input type="file" name="imagen2" class="form-control" accept="image/jpeg,image/png,image/webp" required>
+                                <small class="text-muted">📸 Captura horizontal para galería - Máx 10MB</small>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Imagen 3 (Captura 2) *</label>
+                                <input type="file" name="imagen3" class="form-control" accept="image/jpeg,image/png,image/webp" required>
+                                <small class="text-muted">📸 Captura horizontal para galería - Máx 10MB</small>
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Imagen 4 (Captura 3) *</label>
+                                <input type="file" name="imagen4" class="form-control" accept="image/jpeg,image/png,image/webp" required>
+                                <small class="text-muted">📸 Captura horizontal para galería - Máx 10MB</small>
+                            </div>
+                            
+                            <!-- VIDEO DE YOUTUBE (URL) -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">Video de YouTube (Trailer/Gameplay)</label>
+                                <input type="url" th:field="*{videoYoutubeUrl}" class="form-control" placeholder="https://www.youtube.com/watch?v=...">
+                                <small class="text-muted">Opcional - Enlace de YouTube del trailer</small>
                             </div>
                             
                             <div class="alert alert-warning">

@@ -65,7 +65,12 @@ public class AdminController {
     
     @GetMapping("/movimientos")
     public String movimientos(Model model) {
-        List<Compra> compras = compraRepository.findAll();
+        // Filtrar compras: excluir las de usuarios ADMIN
+        List<Compra> todasLasCompras = compraRepository.findAll();
+        List<Compra> compras = todasLasCompras.stream()
+            .filter(compra -> !compra.getUsuario().getRol().name().equals("ADMIN"))
+            .toList();
+        
         model.addAttribute("compras", compras);
         return "admin/movimientos";
     }

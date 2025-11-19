@@ -36,7 +36,7 @@
                                     <strong th:text="${compra.juego.titulo}">Título del Juego</strong>
                                 </td>
                                 <td th:text="${#temporals.format(compra.fechaCompra, 'dd/MM/yyyy HH:mm')}">01/01/2025</td>
-                                <td class="fw-bold text-success" th:text="${'€' + compra.precioPagado}">€0.00</td>
+                                <td class="fw-bold text-success" th:text="${compra.precioPagado + '€'}">0.00€</td>
                                 <td>
                                     <a th:href="@{/juego/{id}(id=${compra.juego.id})}" class="btn btn-sm btn-outline-primary">
                                         <i class="fas fa-eye me-1"></i>Ver
