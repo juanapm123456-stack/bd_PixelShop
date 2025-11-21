@@ -2,75 +2,68 @@ package com.example.controller;
 
 import com.example.model.Usuario;
 import com.example.model.Compra;
-import com.example.repository.UsuarioRepository;
-import com.example.repository.CompraRepository;
-import com.example.repository.PublicacionJuegoRepository;
+import com.example.service.ServicioUsuario;
+import com.example.service.ServicioAdministrador;
+import com.example.service.ServicioCompra;
+import com.example.service.ServicioAdministrador.ResumenGanancias;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import java.math.BigDecimal;
 import java.util.List;
 
+/**
+ * Controlador para el panel de administración.
+ * Solo accesible por usuarios con rol ADMIN.
+ */
 @Controller
 @RequestMapping("/admin")
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
     
     @Autowired
-    private UsuarioRepository usuarioRepository;
+    private ServicioUsuario servicioUsuario;
     
     @Autowired
-    private CompraRepository compraRepository;
+    private ServicioAdministrador servicioAdministrador;
     
     @Autowired
-    private PublicacionJuegoRepository publicacionRepository;
+    private ServicioCompra servicioCompra;
     
     @GetMapping("/usuarios")
     public String listarUsuarios(Model model) {
-        List<Usuario> usuarios = usuarioRepository.findAll();
+        List<Usuario> usuarios = servicioUsuario.listarTodosLosUsuarios();
         model.addAttribute("usuarios", usuarios);
         return "admin/usuarios";
     }
     
     @PostMapping("/usuario/eliminar/{id}")
     public String eliminarUsuario(@PathVariable Long id, RedirectAttributes redirectAttributes) {
-        usuarioRepository.deleteById(id);
+        servicioUsuario.eliminarUsuario(id);
         redirectAttributes.addFlashAttribute("success", "Usuario eliminado correctamente");
         return "redirect:/admin/usuarios";
     }
     
     @GetMapping("/ganancias")
     public String ganancias(Model model) {
-        // Calcular ganancias totales
-        BigDecimal totalVentas = compraRepository.calcularTotalVentas();
-        BigDecimal gananciaVentas = totalVentas != null ? totalVentas.multiply(new BigDecimal("0.15")) : BigDecimal.ZERO;
+        // Obtener resumen completo de ganancias usando el servicio
+        ResumenGanancias resumen = servicioAdministrador.calcularGananciasTotalesPlataforma();
         
-        Long totalPublicaciones = publicacionRepository.contarPublicacionesPagadas();
-        BigDecimal gananciaPublicaciones = new BigDecimal(totalPublicaciones != null ? totalPublicaciones : 0)
-            .multiply(new BigDecimal("25"));
-        
-        BigDecimal gananciaTotal = gananciaVentas.add(gananciaPublicaciones);
-        
-        model.addAttribute("gananciaVentas", gananciaVentas);
-        model.addAttribute("gananciaPublicaciones", gananciaPublicaciones);
-        model.addAttribute("gananciaTotal", gananciaTotal);
-        model.addAttribute("totalVentas", totalVentas);
-        model.addAttribute("totalPublicaciones", totalPublicaciones);
+        model.addAttribute("gananciaVentas", resumen.getGananciasPorVentas());
+        model.addAttribute("gananciaPublicaciones", resumen.getGananciasPorPublicaciones());
+        model.addAttribute("gananciaTotal", resumen.getGananciaTotal());
+        model.addAttribute("totalVentas", resumen.getTotalVentas());
+        model.addAttribute("totalPublicaciones", resumen.getTotalPublicaciones());
         
         return "admin/ganancias";
     }
     
     @GetMapping("/movimientos")
     public String movimientos(Model model) {
-        // Filtrar compras: excluir las de usuarios ADMIN
-        List<Compra> todasLasCompras = compraRepository.findAll();
-        List<Compra> compras = todasLasCompras.stream()
-            .filter(compra -> !compra.getUsuario().getRol().name().equals("ADMIN"))
-            .toList();
-        
+        // Obtener solo compras válidas (sin las de administradores)
+        List<Compra> compras = servicioCompra.obtenerComprasValidas();
         model.addAttribute("compras", compras);
         return "admin/movimientos";
     }

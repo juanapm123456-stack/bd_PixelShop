@@ -4,6 +4,7 @@ import com.example.model.*;
 import com.example.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +12,15 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * ⚠️ DEPRECADO: Esta clase ya no se usa.
+ * Los datos de ejemplo ahora se cargan desde EjemplosDataSeeder.java
+ * 
+ * Esta clase está desactivada y solo se mantiene como referencia.
+ * Para cargar datos de ejemplo, usar EjemplosDataSeeder que se ejecuta siempre.
+ */
 @Component
+@Profile("never")  // ← DESACTIVADO: nunca se ejecuta
 public class DataSeeder implements CommandLineRunner {
 
     @Autowired
@@ -37,8 +46,15 @@ public class DataSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
+        // ESTA CLASE YA NO SE EJECUTA
+        // Los datos de ejemplo se cargan desde EjemplosDataSeeder.java
+        System.out.println("⚠️ DataSeeder DEPRECADO: Usar EjemplosDataSeeder en su lugar");
+        
         if (usuarioRepository.count() == 0) {
-            System.out.println("🌱 Creando datos de prueba para PIXEL SHOP...");
+            System.out.println("╔══════════════════════════════════════════════════╗");
+            System.out.println("║  ⚠️  CLASE DESACTIVADA - NO SE EJECUTA          ║");
+            System.out.println("║  📝 Usar: EjemplosDataSeeder.java                ║");
+            System.out.println("╚══════════════════════════════════════════════════╝");
             
             // 1. CREAR USUARIOS
             crearUsuarios();
@@ -52,10 +68,16 @@ public class DataSeeder implements CommandLineRunner {
             // 4. CREAR COMPRAS DE EJEMPLO
             crearComprasEjemplo();
             
-            System.out.println("✅ Datos de prueba creados exitosamente!");
+            System.out.println("\n✅ Datos de prueba creados exitosamente!");
             System.out.println("🎮 Usuarios creados: " + usuarioRepository.count());
             System.out.println("🎯 Juegos creados: " + juegoRepository.count());
             System.out.println("💰 Compras creadas: " + compraRepository.count());
+            System.out.println("\n📧 Credenciales de prueba:");
+            System.out.println("   ADMIN:     admin@pixelshop.com / admin123");
+            System.out.println("   PROVEEDOR: epic@pixelshop.com / proveedor123");
+            System.out.println("   CLIENTE:   maria@gmail.com / cliente123");
+        } else {
+            System.out.println("ℹ️ DataSeeder: BD ya contiene datos, no se cargan datos de prueba");
         }
     }
     

@@ -2,10 +2,9 @@ package com.example.controller;
 
 import com.example.model.Juego;
 import com.example.model.Usuario;
-import com.example.model.Compra;
-import com.example.repository.JuegoRepository;
-import com.example.repository.CompraRepository;
-import com.example.repository.UsuarioRepository;
+import com.example.service.ServicioJuego;
+import com.example.service.ServicioUsuario;
+import com.example.service.ServicioCompra;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,33 +14,35 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import java.util.List;
-import java.util.stream.Collectors;
 
+/**
+ * Controlador para mostrar el catálogo de juegos.
+ */
 @Controller
 public class CatalogoController {
     
     @Autowired
-    private JuegoRepository juegoRepository;
+    private ServicioJuego servicioJuego;
     
     @Autowired
-    private CompraRepository compraRepository;
+    private ServicioUsuario servicioUsuario;
     
     @Autowired
-    private UsuarioRepository usuarioRepository;
+    private ServicioCompra servicioCompra;
     
     @GetMapping("/")
     public String index(Model model, @AuthenticationPrincipal UserDetails userDetails) {
-        List<Juego> juegos = juegoRepository.findByActivoTrue();
+        // Obtener todos los juegos activos del catálogo
+        List<Juego> juegos = servicioJuego.obtenerJuegosActivos();
         model.addAttribute("juegos", juegos);
         
         // Si hay usuario logueado, obtener sus juegos comprados (solo CLIENTE y PROVEEDOR)
         if (userDetails != null) {
-            Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername()).orElse(null);
-            if (usuario != null && usuario.getRol() != com.example.model.Rol.ADMIN) {
-                List<Compra> compras = compraRepository.findByUsuarioOrderByFechaCompraDesc(usuario);
-                List<Long> juegosCompradosIds = compras.stream()
-                    .map(c -> c.getJuego().getId())
-                    .collect(Collectors.toList());
+            Usuario usuario = servicioUsuario.buscarUsuarioPorEmail(userDetails.getUsername());
+            
+            // Solo obtener juegos comprados si no es administrador
+            if (servicioCompra.puedeRealizarCompras(usuario)) {
+                List<Long> juegosCompradosIds = servicioCompra.obtenerIdsDeJuegosComprados(usuario);
                 model.addAttribute("juegosComprados", juegosCompradosIds);
             }
         }
@@ -52,22 +53,20 @@ public class CatalogoController {
     @GetMapping("/juego/{id}")
     public String detalleJuego(@PathVariable Long id, Model model, 
                                @AuthenticationPrincipal UserDetails userDetails) {
-        Juego juego = juegoRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Juego no encontrado"));
-        
+        // Buscar el juego por ID
+        Juego juego = servicioJuego.buscarJuegoPorId(id);
         model.addAttribute("juego", juego);
         
         // Verificar si el usuario ya compró este juego (solo para CLIENTE y PROVEEDOR)
         if (userDetails != null) {
-            Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername()).orElse(null);
-            if (usuario != null) {
-                // Los ADMIN nunca pueden "haber comprado" porque no pueden comprar
-                boolean yaComprado = false;
-                if (usuario.getRol() != com.example.model.Rol.ADMIN) {
-                    yaComprado = compraRepository.existsByUsuarioAndJuego(usuario, juego);
-                }
-                model.addAttribute("yaComprado", yaComprado);
+            Usuario usuario = servicioUsuario.buscarUsuarioPorEmail(userDetails.getUsername());
+            
+            // Los ADMIN nunca pueden "haber comprado" porque no pueden comprar
+            boolean yaComprado = false;
+            if (servicioCompra.puedeRealizarCompras(usuario)) {
+                yaComprado = servicioCompra.verificarJuegoYaComprado(usuario, juego);
             }
+            model.addAttribute("yaComprado", yaComprado);
         }
         
         return "catalogo/juego-detalle";
@@ -75,7 +74,8 @@ public class CatalogoController {
     
     @GetMapping("/buscar")
     public String buscar(@RequestParam String q, Model model) {
-        List<Juego> juegos = juegoRepository.findByTituloContainingIgnoreCaseAndActivoTrue(q);
+        // Buscar juegos por título
+        List<Juego> juegos = servicioJuego.buscarJuegosPorTitulo(q);
         model.addAttribute("juegos", juegos);
         model.addAttribute("busqueda", q);
         return "catalogo/index";

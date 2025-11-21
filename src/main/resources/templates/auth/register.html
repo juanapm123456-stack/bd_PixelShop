@@ -1,55 +1,139 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/header :: head('Registro - Pixel Shop')}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - Pixel Shop</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link th:href="@{/css/auth/register.css}" rel="stylesheet">
 </head>
-<body class="register-body">
-    <div class="register-container">
-        <div class="register-card">
-            <div class="text-center mb-4">
-                <i class="fas fa-user-plus fa-4x text-primary mb-3"></i>
-                <h2 class="fw-bold">Crear Cuenta</h2>
-                <p class="text-muted">Únete a Pixel Shop</p>
-            </div>
+<body>
+    <!-- SPLIT SCREEN LAYOUT -->
+    <div class="split-container">
+        
+        <!-- LADO IZQUIERDO -->
+        <div class="left-side">
+            <canvas id="particleCanvas"></canvas>
             
-            <!-- Mensajes -->
-            <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
-            
-            <form th:action="@{/register}" th:object="${usuario}" method="post">
-                <div class="mb-3">
-                    <label class="form-label">Nombre completo</label>
-                    <input type="text" th:field="*{nombre}" class="form-control" placeholder="Tu nombre" required>
+            <div class="left-content">
+                <div class="big-logo">
+                    <i class="fas fa-user-plus"></i>
                 </div>
                 
-                <div class="mb-3">
-                    <label class="form-label">Email</label>
-                    <input type="email" th:field="*{email}" class="form-control" placeholder="tu@email.com" required>
-                </div>
+                <h1 class="welcome-title">Únete a</h1>
+                <h2 class="brand-name">Pixel Shop</h2>
+                <p class="tagline">Crea tu cuenta y empieza a disfrutar de miles de juegos</p>
                 
-                <div class="mb-3">
-                    <label class="form-label">Contraseña</label>
-                    <input type="password" th:field="*{password}" class="form-control" placeholder="Mínimo 6 caracteres" required minlength="6">
+                <div class="features">
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Registro rápido y seguro</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Publica tus propios juegos</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>Comunidad activa</span>
+                    </div>
                 </div>
-                
-                <div class="mb-3">
-                    <label class="form-label">¿Eres proveedor de juegos?</label>
-                    <select th:field="*{rol}" class="form-select">
-                        <option value="CLIENTE">No, solo quiero comprar juegos</option>
-                        <option value="PROVEEDOR">Sí, quiero publicar y vender juegos</option>
-                    </select>
-                </div>
-                
-                <button type="submit" class="btn btn-primary w-100 py-2 mb-3">
-                    <i class="fas fa-user-check me-2"></i>Crear Cuenta
-                </button>
-            </form>
-            
-            <div class="text-center">
-                <p class="mb-0">¿Ya tienes cuenta? 
-                    <a th:href="@{/login}" class="text-primary fw-bold">Inicia sesión</a>
-                </p>
             </div>
         </div>
+        
+        <!-- LADO DERECHO -->
+        <div class="right-side">
+            <div class="form-container">
+                
+                <div class="form-header">
+                    <h3 class="form-title">Crear Cuenta</h3>
+                    <p class="form-subtitle">Completa el formulario para registrarte</p>
+                </div>
+                
+                <!-- Mensajes -->
+                <div th:if="${error}" class="alert-custom alert-danger">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span th:text="${error}"></span>
+                </div>
+                
+                <!-- Formulario -->
+                <form th:action="@{/register}" th:object="${usuario}" method="post" class="register-form">
+                    
+                    <div class="form-group">
+                        <label class="form-label">Nombre completo</label>
+                        <div class="input-box">
+                            <i class="input-icon fas fa-user"></i>
+                            <input type="text" 
+                                   th:field="*{nombre}" 
+                                   class="form-input" 
+                                   placeholder="Tu nombre" 
+                                   required
+                                   autocomplete="name">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <div class="input-box">
+                            <i class="input-icon fas fa-envelope"></i>
+                            <input type="email" 
+                                   th:field="*{email}" 
+                                   class="form-input" 
+                                   placeholder="tu@email.com" 
+                                   required
+                                   autocomplete="email">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Contraseña</label>
+                        <div class="input-box">
+                            <i class="input-icon fas fa-lock"></i>
+                            <input type="password" 
+                                   th:field="*{password}" 
+                                   class="form-input" 
+                                   placeholder="Mínimo 6 caracteres" 
+                                   required 
+                                   minlength="6"
+                                   autocomplete="new-password">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Tipo de cuenta</label>
+                        <div class="input-box">
+                            <i class="input-icon fas fa-briefcase"></i>
+                            <select th:field="*{rol}" class="form-input form-select-custom">
+                                <option value="CLIENTE"> Cliente - Solo comprar juegos</option>
+                                <option value="PROVEEDOR"> Proveedor - Publicar y vender juegos</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn-submit">
+                        <span>Crear Cuenta</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </form>
+                
+                <div class="divider">
+                    <span>o</span>
+                </div>
+                
+                <div class="login-section">
+                    <p class="login-text">¿Ya tienes una cuenta?</p>
+                    <a th:href="@{/login}" class="btn-login-link">
+                        <span>Iniciar sesión</span>
+                        <i class="fas fa-sign-in-alt"></i>
+                    </a>
+                </div>
+                
+            </div>
+        </div>
+        
     </div>
+    
+    <script th:src="@{/js/login-animation.js}"></script>
 </body>
 </html>
