@@ -2,13 +2,12 @@ package com.example.service;
 
 import com.example.model.Compra;
 import com.example.model.Usuario;
-import com.resend.Resend;
-import com.resend.core.exception.ResendException;
-import com.resend.services.emails.model.CreateEmailOptions;
-import com.resend.services.emails.model.CreateEmailResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import jakarta.mail.internet.MimeMessage;
 
 import java.time.format.DateTimeFormatter;
 
@@ -16,9 +15,9 @@ import java.time.format.DateTimeFormatter;
 public class EmailService {
 
     @Autowired
-    private Resend resendClient;
+    private JavaMailSender mailSender;
 
-    @Value("${email.from:noreply@pixelshop.com}")
+    @Value("${email.from}")
     private String fromEmail;
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
@@ -31,25 +30,22 @@ public class EmailService {
             System.out.println("🔧 Construyendo email de bienvenida para: " + usuario.getEmail());
             String htmlContent = construirEmailBienvenida(usuario);
             
-            System.out.println("📤 Enviando a Resend API...");
+            System.out.println("📤 Enviando email via Gmail SMTP...");
             System.out.println("   From: " + fromEmail);
             System.out.println("   To: " + usuario.getEmail());
             
-            CreateEmailOptions params = CreateEmailOptions.builder()
-                .from(fromEmail)
-                .to(usuario.getEmail())
-                .subject("¡Bienvenido a PixelShop! 🎮")
-                .html(htmlContent)
-                .build();
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom(fromEmail);
+            helper.setTo(usuario.getEmail());
+            helper.setSubject("¡Bienvenido a PixelShop! 🎮");
+            helper.setText(htmlContent, true);
             
-            CreateEmailResponse response = resendClient.emails().send(params);
-            System.out.println("✅ Email de bienvenida enviado. ID: " + response.getId());
+            mailSender.send(message);
+            System.out.println("✅ Email de bienvenida enviado correctamente");
             
-        } catch (ResendException e) {
-            System.err.println("❌ Error al enviar email de bienvenida: " + e.getMessage());
-            e.printStackTrace();
         } catch (Exception e) {
-            System.err.println("❌ Error inesperado al enviar email: " + e.getMessage());
+            System.err.println("❌ Error al enviar email de bienvenida: " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -61,17 +57,17 @@ public class EmailService {
         try {
             String htmlContent = construirEmailConfirmacionCompra(compra);
             
-            CreateEmailOptions params = CreateEmailOptions.builder()
-                .from(fromEmail)
-                .to(compra.getUsuario().getEmail())
-                .subject("✅ Confirmación de compra - " + compra.getJuego().getTitulo())
-                .html(htmlContent)
-                .build();
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom(fromEmail);
+            helper.setTo(compra.getUsuario().getEmail());
+            helper.setSubject("✅ Confirmación de compra - " + compra.getJuego().getTitulo());
+            helper.setText(htmlContent, true);
             
-            CreateEmailResponse response = resendClient.emails().send(params);
-            System.out.println("✅ Email de confirmación enviado. ID: " + response.getId());
+            mailSender.send(message);
+            System.out.println("✅ Email de confirmación enviado correctamente");
             
-        } catch (ResendException e) {
+        } catch (Exception e) {
             System.err.println("❌ Error al enviar confirmación de compra: " + e.getMessage());
         }
     }
@@ -84,17 +80,17 @@ public class EmailService {
             String enlaceRecuperacion = "http://localhost:8080/auth/reset-password?token=" + token;
             String htmlContent = construirEmailRecuperacionPassword(nombreUsuario, enlaceRecuperacion);
             
-            CreateEmailOptions params = CreateEmailOptions.builder()
-                .from(fromEmail)
-                .to(email)
-                .subject("🔒 Recuperación de contraseña - PixelShop")
-                .html(htmlContent)
-                .build();
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom(fromEmail);
+            helper.setTo(email);
+            helper.setSubject("🔒 Recuperación de contraseña - PixelShop");
+            helper.setText(htmlContent, true);
             
-            CreateEmailResponse response = resendClient.emails().send(params);
-            System.out.println("✅ Email de recuperación enviado. ID: " + response.getId());
+            mailSender.send(message);
+            System.out.println("✅ Email de recuperación enviado correctamente");
             
-        } catch (ResendException e) {
+        } catch (Exception e) {
             System.err.println("❌ Error al enviar email de recuperación: " + e.getMessage());
         }
     }
@@ -106,17 +102,17 @@ public class EmailService {
         try {
             String htmlContent = construirEmailNotificacionEnvio(compra, numeroSeguimiento);
             
-            CreateEmailOptions params = CreateEmailOptions.builder()
-                .from(fromEmail)
-                .to(compra.getUsuario().getEmail())
-                .subject("🚚 ¡Tu juego está en camino! - " + compra.getJuego().getTitulo())
-                .html(htmlContent)
-                .build();
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom(fromEmail);
+            helper.setTo(compra.getUsuario().getEmail());
+            helper.setSubject("🚚 ¡Tu juego está en camino! - " + compra.getJuego().getTitulo());
+            helper.setText(htmlContent, true);
             
-            CreateEmailResponse response = resendClient.emails().send(params);
-            System.out.println("✅ Email de notificación de envío enviado. ID: " + response.getId());
+            mailSender.send(message);
+            System.out.println("✅ Email de notificación de envío enviado correctamente");
             
-        } catch (ResendException e) {
+        } catch (Exception e) {
             System.err.println("❌ Error al enviar notificación de envío: " + e.getMessage());
         }
     }
