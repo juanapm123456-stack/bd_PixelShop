@@ -15,7 +15,18 @@
         </div>
         
         <!-- Mensajes -->
-        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <span th:text="${success}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <span th:text="${error}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        <div th:if="${warning}" class="alert alert-warning alert-dismissible fade show" role="alert">
+            <span th:text="${warning}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
         
         <!-- Resumen de ingresos -->
         <div class="row mb-4">
@@ -66,15 +77,30 @@
                                     <span th:unless="${movimiento.pagado}" class="badge bg-warning">
                                         <i class="fas fa-clock me-1"></i>Pendiente
                                     </span>
+                                    <!-- Mostrar método de cobro si fue pagado -->
+                                    <small th:if="${movimiento.pagado && movimiento.metodoCobro != null}" 
+                                           class="d-block text-muted mt-1">
+                                        <i class="fab fa-paypal me-1" th:if="${movimiento.metodoCobro == 'PAYPAL'}"></i>
+                                        <i class="fas fa-credit-card me-1" th:if="${movimiento.metodoCobro == 'TARJETA'}"></i>
+                                        <span th:text="${movimiento.metodoCobro}"></span>
+                                    </small>
                                 </td>
                                 <td>
-                                    <form th:if="${!movimiento.pagado}" 
-                                          th:action="@{/proveedor/cobrar/{id}(id=${movimiento.id})}" 
-                                          method="post" class="d-inline">
-                                        <button type="submit" class="btn btn-sm btn-success">
-                                            <i class="fas fa-money-bill-wave me-1"></i>Cobrar
-                                        </button>
-                                    </form>
+                                    <!-- Botón Cobrar que abre modal -->
+                                    <button th:if="${!movimiento.pagado}" 
+                                            type="button" 
+                                            class="btn btn-sm btn-success"
+                                            data-bs-toggle="modal" 
+                                            th:data-bs-target="'#modalCobrar' + ${movimiento.id}">
+                                        <i class="fas fa-money-bill-wave me-1"></i>Cobrar
+                                    </button>
+                                    
+                                    <!-- Mostrar fecha de cobro si ya fue pagado -->
+                                    <small th:if="${movimiento.pagado && movimiento.fechaCobro != null}" 
+                                           class="text-muted d-block">
+                                        <i class="fas fa-calendar-check me-1"></i>
+                                        <span th:text="${#temporals.format(movimiento.fechaCobro, 'dd/MM/yyyy')}"></span>
+                                    </small>
                                 </td>
                             </tr>
                         </tbody>
@@ -88,6 +114,147 @@
             <i class="fas fa-chart-line fa-5x text-muted mb-4"></i>
             <h3>No tienes ventas aún</h3>
             <p class="text-muted">Tus ventas aparecerán aquí</p>
+        </div>
+    </div>
+    
+    <!-- Modales de cobro (uno por cada movimiento pendiente) -->
+    <div th:each="movimiento : ${movimientos}" th:if="${!movimiento.pagado}">
+        <div class="modal fade" th:id="'modalCobrar' + ${movimiento.id}" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title">
+                            <i class="fas fa-money-bill-wave me-2"></i>Cobrar Venta
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    
+                    <form th:action="@{/proveedor/cobrar/{id}(id=${movimiento.id})}" method="post">
+                        <div class="modal-body">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Vas a cobrar:</strong> €<span th:text="${movimiento.montoNeto}">0.00</span>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <strong>Juego:</strong> <span th:text="${movimiento.compra.juego.titulo}"></span><br>
+                                <strong>Comprador:</strong> <span th:text="${movimiento.compra.usuario.nombre}"></span><br>
+                                <strong>Fecha de venta:</strong> <span th:text="${#temporals.format(movimiento.fecha, 'dd/MM/yyyy HH:mm')}"></span>
+                            </div>
+                            
+                            <hr>
+                            
+                            <!-- Selector de método de pago -->
+                            <div class="mb-4">
+                                <label class="form-label fw-bold">
+                                    <i class="fas fa-money-check-alt me-2"></i>Selecciona el método de cobro
+                                </label>
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" class="btn-check" name="metodoCobro" id="metodoPayPal${movimiento.id}" value="PAYPAL" checked autocomplete="off">
+                                    <label class="btn btn-outline-primary" for="metodoPayPal${movimiento.id}">
+                                        <i class="fab fa-paypal me-2"></i>PayPal
+                                    </label>
+                                    
+                                    <input type="radio" class="btn-check" name="metodoCobro" id="metodoTarjeta${movimiento.id}" value="TARJETA" autocomplete="off">
+                                    <label class="btn btn-outline-success" for="metodoTarjeta${movimiento.id}">
+                                        <i class="fas fa-credit-card me-2"></i>Tarjeta Bancaria
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Formulario PayPal -->
+                            <div id="formPayPal${movimiento.id}" class="metodo-pago-form">
+                                <div class="mb-3">
+                                    <label for="emailPayPal${movimiento.id}" class="form-label fw-bold">
+                                        <i class="fab fa-paypal me-2 text-primary"></i>Email de tu cuenta PayPal
+                                    </label>
+                                    <input type="email" 
+                                           class="form-control form-control-lg" 
+                                           id="emailPayPal${movimiento.id}" 
+                                           name="emailPayPal" 
+                                           th:value="${usuario.emailPayPal}"
+                                           placeholder="tu-email@paypal.com">
+                                    <div class="form-text">
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        El dinero se enviará mediante PayPal Payouts
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Formulario Tarjeta Bancaria -->
+                            <div id="formTarjeta${movimiento.id}" class="metodo-pago-form" style="display:none;">
+                                <div class="mb-3">
+                                    <label for="numeroTarjeta${movimiento.id}" class="form-label fw-bold">
+                                        <i class="fas fa-credit-card me-2 text-success"></i>Número de Tarjeta / IBAN
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control form-control-lg" 
+                                           id="numeroTarjeta${movimiento.id}" 
+                                           name="numeroTarjeta" 
+                                           placeholder="ES00 0000 0000 0000 0000 0000">
+                                    <div class="form-text">
+                                        <i class="fas fa-shield-alt text-success me-1"></i>
+                                        Ingresa tu IBAN para recibir transferencia bancaria
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="titularTarjeta${movimiento.id}" class="form-label fw-bold">
+                                        <i class="fas fa-user me-2"></i>Titular de la Cuenta
+                                    </label>
+                                    <input type="text" 
+                                           class="form-control form-control-lg" 
+                                           id="titularTarjeta${movimiento.id}" 
+                                           name="titularTarjeta" 
+                                           placeholder="Nombre completo del titular">
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <small><strong>Importante:</strong> El pago se procesará inmediatamente. Verifica que los datos sean correctos.</small>
+                            </div>
+                        </div>
+                        
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                const metodoPP = document.getElementById('metodoPayPal${movimiento.id}');
+                                const metodoTC = document.getElementById('metodoTarjeta${movimiento.id}');
+                                const formPP = document.getElementById('formPayPal${movimiento.id}');
+                                const formTC = document.getElementById('formTarjeta${movimiento.id}');
+                                const emailInput = document.getElementById('emailPayPal${movimiento.id}');
+                                const tarjetaInput = document.getElementById('numeroTarjeta${movimiento.id}');
+                                const titularInput = document.getElementById('titularTarjeta${movimiento.id}');
+                                
+                                metodoPP.addEventListener('change', function() {
+                                    formPP.style.display = 'block';
+                                    formTC.style.display = 'none';
+                                    emailInput.required = true;
+                                    tarjetaInput.required = false;
+                                    titularInput.required = false;
+                                });
+                                
+                                metodoTC.addEventListener('change', function() {
+                                    formPP.style.display = 'none';
+                                    formTC.style.display = 'block';
+                                    emailInput.required = false;
+                                    tarjetaInput.required = true;
+                                    titularInput.required = true;
+                                });
+                            });
+                        </script>
+                        
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                                <i class="fas fa-times me-2"></i>Cancelar
+                            </button>
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-check-circle me-2"></i>Confirmar y Cobrar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
         </div>
     </div>
     

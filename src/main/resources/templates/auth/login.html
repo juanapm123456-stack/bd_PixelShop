@@ -45,6 +45,15 @@
                 </button>
             </form>
             
+            <div class="divider my-3">
+                <span>O</span>
+            </div>
+            
+            <!-- Botón de Google OAuth2 -->
+            <a th:href="@{/oauth2/authorization/google}" class="btn btn-google w-100 py-2 mb-3">
+                <i class="fab fa-google me-2"></i>Continuar con Google
+            </a>
+            
             <div class="text-center">
                 <p class="mb-0">¿No tienes cuenta? 
                     <a th:href="@{/register}" class="text-primary fw-bold">Regístrate aquí</a>

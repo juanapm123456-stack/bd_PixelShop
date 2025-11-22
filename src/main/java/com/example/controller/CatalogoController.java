@@ -7,8 +7,7 @@ import com.example.repository.JuegoRepository;
 import com.example.repository.CompraRepository;
 import com.example.repository.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Controller
-public class CatalogoController {
+public class CatalogoController extends BaseController {
     
     @Autowired
     private JuegoRepository juegoRepository;
@@ -30,13 +29,14 @@ public class CatalogoController {
     private UsuarioRepository usuarioRepository;
     
     @GetMapping("/")
-    public String index(Model model, @AuthenticationPrincipal UserDetails userDetails) {
+    public String index(Model model, Authentication authentication) {
         List<Juego> juegos = juegoRepository.findByActivoTrue();
         model.addAttribute("juegos", juegos);
         
         // Si hay usuario logueado, obtener sus juegos comprados (solo CLIENTE y PROVEEDOR)
-        if (userDetails != null) {
-            Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername()).orElse(null);
+        if (authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal().toString())) {
+            String email = obtenerEmailDelUsuario(authentication);
+            Usuario usuario = usuarioRepository.findByEmail(email).orElse(null);
             if (usuario != null && usuario.getRol() != com.example.model.Rol.ADMIN) {
                 List<Compra> compras = compraRepository.findByUsuarioOrderByFechaCompraDesc(usuario);
                 List<Long> juegosCompradosIds = compras.stream()
@@ -51,15 +51,16 @@ public class CatalogoController {
     
     @GetMapping("/juego/{id}")
     public String detalleJuego(@PathVariable Long id, Model model, 
-                               @AuthenticationPrincipal UserDetails userDetails) {
+                               Authentication authentication) {
         Juego juego = juegoRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Juego no encontrado"));
         
         model.addAttribute("juego", juego);
         
         // Verificar si el usuario ya compró este juego (solo para CLIENTE y PROVEEDOR)
-        if (userDetails != null) {
-            Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername()).orElse(null);
+        if (authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal().toString())) {
+            String email = obtenerEmailDelUsuario(authentication);
+            Usuario usuario = usuarioRepository.findByEmail(email).orElse(null);
             if (usuario != null) {
                 // Los ADMIN nunca pueden "haber comprado" porque no pueden comprar
                 boolean yaComprado = false;

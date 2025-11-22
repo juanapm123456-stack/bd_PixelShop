@@ -2,10 +2,12 @@ package com.example.controller;
 
 import com.example.model.*;
 import com.example.repository.*;
+import com.example.service.CloudinaryService;
+import com.example.service.PayPalPayoutService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +28,7 @@ import java.io.ByteArrayInputStream;
 @Controller
 @RequestMapping("/proveedor")
 @PreAuthorize("hasAnyRole('PROVEEDOR', 'ADMIN')")
-public class ProveedorController {
+public class ProveedorController extends BaseController {
     
     @Autowired
     private JuegoRepository juegoRepository;
@@ -40,6 +42,15 @@ public class ProveedorController {
     @Autowired
     private MovimientoProveedorRepository movimientoRepository;
     
+    @Autowired
+    private CloudinaryService cloudinaryService;
+    
+    @Autowired
+    private PayPalPayoutService payPalPayoutService;
+    
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    
     @GetMapping("/publicar")
     public String mostrarFormularioPublicar(Model model) {
         model.addAttribute("juego", new Juego());
@@ -52,10 +63,11 @@ public class ProveedorController {
                                 @RequestParam("imagen2") MultipartFile imagen2,
                                 @RequestParam("imagen3") MultipartFile imagen3,
                                 @RequestParam("imagen4") MultipartFile imagen4,
-                                @AuthenticationPrincipal UserDetails userDetails,
+                                Authentication authentication,
                                 RedirectAttributes redirectAttributes) {
         
-        Usuario proveedor = usuarioRepository.findByEmail(userDetails.getUsername())
+        String email = obtenerEmailDelUsuario(authentication);
+        Usuario proveedor = usuarioRepository.findByEmail(email)
             .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         
         try {
@@ -193,8 +205,9 @@ public class ProveedorController {
     }
     
     @GetMapping("/mis-juegos")
-    public String misJuegos(Model model, @AuthenticationPrincipal UserDetails userDetails) {
-        Usuario proveedor = usuarioRepository.findByEmail(userDetails.getUsername())
+    public String misJuegos(Model model, Authentication authentication) {
+        String email = obtenerEmailDelUsuario(authentication);
+        Usuario proveedor = usuarioRepository.findByEmail(email)
             .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         
         List<Juego> juegos = juegoRepository.findByProveedor(proveedor);
@@ -204,13 +217,15 @@ public class ProveedorController {
     }
     
     @GetMapping("/ventas")
-    public String ventas(Model model, @AuthenticationPrincipal UserDetails userDetails) {
-        Usuario proveedor = usuarioRepository.findByEmail(userDetails.getUsername())
+    public String ventas(Model model, Authentication authentication) {
+        String email = obtenerEmailDelUsuario(authentication);
+        Usuario proveedor = usuarioRepository.findByEmail(email)
             .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         
         List<MovimientoProveedor> movimientos = movimientoRepository.findByProveedorOrderByFechaDesc(proveedor);
         BigDecimal ingresosPendientes = movimientoRepository.calcularIngresosPendientes(proveedor);
         
+        model.addAttribute("usuario", proveedor); // Para verificar si tiene contraseña
         model.addAttribute("movimientos", movimientos);
         model.addAttribute("ingresosPendientes", ingresosPendientes != null ? ingresosPendientes : BigDecimal.ZERO);
         
@@ -218,20 +233,107 @@ public class ProveedorController {
     }
     
     @PostMapping("/cobrar/{movimientoId}")
-    public String cobrarMovimiento(@PathVariable Long movimientoId, RedirectAttributes redirectAttributes) {
-        MovimientoProveedor movimiento = movimientoRepository.findById(movimientoId)
-            .orElseThrow(() -> new RuntimeException("Movimiento no encontrado"));
+    public String cobrarMovimiento(@PathVariable Long movimientoId, 
+                                   @RequestParam String metodoCobro,
+                                   @RequestParam(required = false) String emailPayPal,
+                                   @RequestParam(required = false) String numeroTarjeta,
+                                   @RequestParam(required = false) String titularTarjeta,
+                                   Authentication authentication,
+                                   RedirectAttributes redirectAttributes) {
+        try {
+            // Verificar que el movimiento existe y pertenece al proveedor
+            String email = obtenerEmailDelUsuario(authentication);
+            Usuario proveedor = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+            
+            MovimientoProveedor movimiento = movimientoRepository.findById(movimientoId)
+                .orElseThrow(() -> new RuntimeException("Movimiento no encontrado"));
+            
+            // Verificar que el movimiento pertenece al proveedor autenticado
+            if (!movimiento.getProveedor().getId().equals(proveedor.getId())) {
+                redirectAttributes.addFlashAttribute("error", "No tienes permisos para cobrar este movimiento");
+                return "redirect:/proveedor/ventas";
+            }
+            
+            // Verificar que no esté ya pagado
+            if (movimiento.getPagado()) {
+                redirectAttributes.addFlashAttribute("warning", "Este movimiento ya fue cobrado");
+                return "redirect:/proveedor/ventas";
+            }
+            
+            // Procesar según el método de cobro seleccionado
+            if ("PAYPAL".equals(metodoCobro)) {
+                // Validar email PayPal
+                if (emailPayPal == null || emailPayPal.trim().isEmpty()) {
+                    redirectAttributes.addFlashAttribute("error", 
+                        "❌ Debes proporcionar tu email de PayPal.");
+                    return "redirect:/proveedor/ventas";
+                }
+                
+                // Validar formato de email
+                if (!emailPayPal.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+                    redirectAttributes.addFlashAttribute("error", 
+                        "❌ El formato del email de PayPal no es válido.");
+                    return "redirect:/proveedor/ventas";
+                }
+                
+                // Enviar pago a través de PayPal Payouts
+                String payoutBatchId = payPalPayoutService.enviarPagoProveedor(movimiento, emailPayPal);
+                
+                // Actualizar el movimiento
+                movimiento.setPagado(true);
+                movimiento.setFechaCobro(LocalDateTime.now());
+                movimiento.setMetodoCobro("PAYPAL");
+                movimiento.setEmailPayPalProveedor(emailPayPal);
+                movimiento.setPayoutBatchId(payoutBatchId);
+                movimientoRepository.save(movimiento);
+                
+                redirectAttributes.addFlashAttribute("success", 
+                    "✅ Pago enviado exitosamente a " + emailPayPal + " vía PayPal. Recibirás €" + movimiento.getMontoNeto() + " en tu cuenta PayPal.");
+                    
+            } else if ("TARJETA".equals(metodoCobro)) {
+                // Validar datos de tarjeta
+                if (numeroTarjeta == null || numeroTarjeta.trim().isEmpty()) {
+                    redirectAttributes.addFlashAttribute("error", 
+                        "❌ Debes proporcionar tu número de tarjeta o IBAN.");
+                    return "redirect:/proveedor/ventas";
+                }
+                
+                if (titularTarjeta == null || titularTarjeta.trim().isEmpty()) {
+                    redirectAttributes.addFlashAttribute("error", 
+                        "❌ Debes proporcionar el nombre del titular.");
+                    return "redirect:/proveedor/ventas";
+                }
+                
+                // Actualizar el movimiento (pago pendiente de procesar manualmente)
+                movimiento.setPagado(true);
+                movimiento.setFechaCobro(LocalDateTime.now());
+                movimiento.setMetodoCobro("TARJETA");
+                movimiento.setNumeroTarjeta(numeroTarjeta);
+                movimiento.setTitularTarjeta(titularTarjeta);
+                movimiento.setIban(numeroTarjeta); // Guardar IBAN también
+                movimientoRepository.save(movimiento);
+                
+                redirectAttributes.addFlashAttribute("success", 
+                    "✅ Solicitud de pago registrada. Se realizará una transferencia de €" + movimiento.getMontoNeto() + " a la cuenta " + numeroTarjeta + " en 3-5 días hábiles.");
+            } else {
+                redirectAttributes.addFlashAttribute("error", "❌ Método de cobro no válido.");
+                return "redirect:/proveedor/ventas";
+            }
+            
+        } catch (Exception e) {
+            System.err.println("Error al procesar pago: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", 
+                "❌ Error al enviar el pago: " + e.getMessage());
+        }
         
-        movimiento.setPagado(true);
-        movimientoRepository.save(movimiento);
-        
-        redirectAttributes.addFlashAttribute("success", "Movimiento marcado como cobrado");
         return "redirect:/proveedor/ventas";
     }
     
     @GetMapping("/editar/{id}")
-    public String mostrarEditar(@PathVariable Long id, Model model, @AuthenticationPrincipal UserDetails userDetails) {
-        Usuario proveedor = usuarioRepository.findByEmail(userDetails.getUsername())
+    public String mostrarEditar(@PathVariable Long id, Model model, Authentication authentication) {
+        String email = obtenerEmailDelUsuario(authentication);
+        Usuario proveedor = usuarioRepository.findByEmail(email)
             .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         
         Juego juego = juegoRepository.findById(id)
@@ -253,10 +355,11 @@ public class ProveedorController {
                               @RequestParam(value = "imagen2", required = false) MultipartFile imagen2,
                               @RequestParam(value = "imagen3", required = false) MultipartFile imagen3,
                               @RequestParam(value = "imagen4", required = false) MultipartFile imagen4,
-                              @AuthenticationPrincipal UserDetails userDetails,
+                              Authentication authentication,
                               RedirectAttributes redirectAttributes) {
         
-        Usuario proveedor = usuarioRepository.findByEmail(userDetails.getUsername())
+        String email = obtenerEmailDelUsuario(authentication);
+        Usuario proveedor = usuarioRepository.findByEmail(email)
             .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         
         Juego juego = juegoRepository.findById(id)

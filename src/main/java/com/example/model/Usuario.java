@@ -29,6 +29,9 @@ public class Usuario {
     @Column(name = "datos_fiscales", length = 500)
     private String datosFiscales;
     
+    @Column(name = "email_paypal", length = 255)
+    private String emailPayPal; // Email de PayPal para recibir pagos (solo proveedores)
+    
     @Column(name = "fecha_registro", nullable = false)
     private LocalDateTime fechaRegistro;
     
@@ -119,6 +122,14 @@ public class Usuario {
     
     public void setDatosFiscales(String datosFiscales) {
         this.datosFiscales = datosFiscales;
+    }
+    
+    public String getEmailPayPal() {
+        return emailPayPal;
+    }
+    
+    public void setEmailPayPal(String emailPayPal) {
+        this.emailPayPal = emailPayPal;
     }
     
     public LocalDateTime getFechaRegistro() {

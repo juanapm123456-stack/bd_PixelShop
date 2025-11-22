@@ -3,6 +3,7 @@ package com.example.controller;
 import com.example.model.Usuario;
 import com.example.model.Rol;
 import com.example.repository.UsuarioRepository;
+import com.example.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -21,6 +22,9 @@ public class AuthController {
     
     @Autowired
     private PasswordEncoder passwordEncoder;
+    
+    @Autowired
+    private EmailService emailService;
     
     @GetMapping("/login")
     public String login() {
@@ -50,6 +54,16 @@ public class AuthController {
         usuario.setActivo(true);
         
         usuarioRepository.save(usuario);
+        
+        // Enviar email de bienvenida
+        try {
+            System.out.println("📧 Intentando enviar email de bienvenida a: " + usuario.getEmail());
+            emailService.enviarEmailBienvenida(usuario);
+            System.out.println("✅ Email de bienvenida enviado correctamente");
+        } catch (Exception e) {
+            System.err.println("❌ Error al enviar email de bienvenida: " + e.getMessage());
+            e.printStackTrace();
+        }
         
         redirectAttributes.addFlashAttribute("success", "Registro exitoso. Inicia sesión");
         return "redirect:/login";

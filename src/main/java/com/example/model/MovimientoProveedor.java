@@ -29,6 +29,27 @@ public class MovimientoProveedor {
     @Column(nullable = false)
     private LocalDateTime fecha;
     
+    @Column(name = "fecha_cobro")
+    private LocalDateTime fechaCobro;
+    
+    @Column(name = "email_paypal_proveedor", length = 255)
+    private String emailPayPalProveedor;
+    
+    @Column(name = "payout_batch_id", length = 100)
+    private String payoutBatchId; // ID del lote de pago de PayPal
+    
+    @Column(name = "metodo_cobro", length = 20)
+    private String metodoCobro; // "PAYPAL" o "TARJETA"
+    
+    @Column(name = "numero_tarjeta", length = 19)
+    private String numeroTarjeta; // Últimos 4 dígitos o número enmascarado
+    
+    @Column(name = "titular_tarjeta", length = 100)
+    private String titularTarjeta;
+    
+    @Column(name = "iban", length = 34)
+    private String iban; // IBAN para transferencias
+    
     // Constructores
     public MovimientoProveedor() {}
     
@@ -103,5 +124,61 @@ public class MovimientoProveedor {
     
     public void setFecha(LocalDateTime fecha) {
         this.fecha = fecha;
+    }
+    
+    public LocalDateTime getFechaCobro() {
+        return fechaCobro;
+    }
+    
+    public void setFechaCobro(LocalDateTime fechaCobro) {
+        this.fechaCobro = fechaCobro;
+    }
+    
+    public String getEmailPayPalProveedor() {
+        return emailPayPalProveedor;
+    }
+    
+    public void setEmailPayPalProveedor(String emailPayPalProveedor) {
+        this.emailPayPalProveedor = emailPayPalProveedor;
+    }
+    
+    public String getPayoutBatchId() {
+        return payoutBatchId;
+    }
+    
+    public void setPayoutBatchId(String payoutBatchId) {
+        this.payoutBatchId = payoutBatchId;
+    }
+    
+    public String getMetodoCobro() {
+        return metodoCobro;
+    }
+    
+    public void setMetodoCobro(String metodoCobro) {
+        this.metodoCobro = metodoCobro;
+    }
+    
+    public String getNumeroTarjeta() {
+        return numeroTarjeta;
+    }
+    
+    public void setNumeroTarjeta(String numeroTarjeta) {
+        this.numeroTarjeta = numeroTarjeta;
+    }
+    
+    public String getTitularTarjeta() {
+        return titularTarjeta;
+    }
+    
+    public void setTitularTarjeta(String titularTarjeta) {
+        this.titularTarjeta = titularTarjeta;
+    }
+    
+    public String getIban() {
+        return iban;
+    }
+    
+    public void setIban(String iban) {
+        this.iban = iban;
     }
 }
