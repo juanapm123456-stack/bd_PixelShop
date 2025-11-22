@@ -1,50 +1,50 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head th:replace="~{fragments/header :: head('Catálogo - Pixel Shop')}">
-    <link th:href="@{/css/catalogo/index.css}" rel="stylesheet">
-</head>
-<body>
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security" class="h-full">
+<head th:replace="~{fragments/header :: head('Catálogo - Pixel Shop')}"></head>
+<body class="min-h-screen flex flex-col bg-gray-50">
     <nav th:replace="~{fragments/header :: navbar}"></nav>
     
-    <div class="catalog-container my-5">
-        <div class="text-center mb-5">
-            <h1 class="display-4 fw-bold">
-                <i class="fas fa-fire text-danger me-3"></i>
+    <div class="flex-grow container mx-auto px-4 py-8">
+        <div class="text-center mb-10">
+            <h1 class="text-5xl font-bold text-gray-800">
+                <i class="fas fa-fire text-red-500 mr-3"></i>
                 Catálogo de Juegos
             </h1>
-            <p class="lead text-muted" th:if="${busqueda}">
+            <p class="text-xl text-gray-600 mt-3" th:if="${busqueda}">
                 Resultados para: <strong th:text="${busqueda}"></strong>
             </p>
         </div>
         
         <!-- Grid de juegos -->
-        <div class="row g-4">
-            <div class="col-12 col-sm-6 col-md-4 col-lg-3" th:each="juego : ${juegos}">
-                <div class="card game-card h-100 shadow-sm">
-                    <img th:src="${juego.imagenUrl1 != null ? juego.imagenUrl1 : 'https://via.placeholder.com/300x400?text=Pixel+Shop'}" 
-                         class="card-img-top" 
-                         th:alt="${juego.titulo}"
-                         onerror="this.src='https://via.placeholder.com/300x400?text=Sin+Imagen'">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <div th:each="juego : ${juegos}">
+                <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-2xl transition-shadow duration-300 h-full flex flex-col">
+                    <div class="relative h-64 overflow-hidden">
+                        <img th:src="${juego.imagenUrl1 != null ? juego.imagenUrl1 : 'https://via.placeholder.com/300x400?text=Pixel+Shop'}" 
+                             th:alt="${juego.titulo}"
+                             class="w-full h-full object-cover"
+                             onerror="this.src='https://via.placeholder.com/300x400?text=Sin+Imagen'">
+                    </div>
                     
-                    <div class="card-body d-flex flex-column">
-                        <h5 class="card-title" th:text="${juego.titulo}">Título del Juego</h5>
-                        <p class="card-text text-muted small flex-grow-1" th:text="${#strings.abbreviate(juego.descripcion, 80)}">Descripción...</p>
+                    <div class="p-4 flex flex-col flex-grow">
+                        <h5 class="text-lg font-bold text-gray-800 mb-2" th:text="${juego.titulo}">Título del Juego</h5>
+                        <p class="text-sm text-gray-600 mb-4 flex-grow" th:text="${#strings.abbreviate(juego.descripcion, 80)}">Descripción...</p>
                         
-                        <div class="d-flex justify-content-between align-items-center">
-                            <span class="h5 mb-0 text-primary fw-bold" th:text="${juego.precio + '€'}">0.00€</span>
+                        <div class="flex justify-between items-center">
+                            <span class="text-2xl font-bold text-blue-600" th:text="${juego.precio + '€'}">0.00€</span>
                             
                             <!-- Botón Ver Detalles -->
-                            <a th:href="@{/juego/{id}(id=${juego.id})}" class="btn btn-outline-primary btn-sm">
+                            <a th:href="@{/juego/{id}(id=${juego.id})}" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-semibold">
                                 Ver Detalles
                             </a>
                         </div>
                         
                         <!-- Badge si ya lo tiene -->
                         <div th:if="${juegosComprados != null && juegosComprados.contains(juego.id)}" 
-                             class="mt-2">
-                            <span class="badge bg-success w-100">
-                                <i class="fas fa-check me-1"></i>En tu biblioteca
+                             class="mt-3">
+                            <span class="inline-block w-full text-center px-3 py-2 bg-green-500 text-white rounded-lg text-sm font-semibold">
+                                <i class="fas fa-check mr-1"></i>En tu biblioteca
                             </span>
                         </div>
                     </div>
@@ -53,10 +53,10 @@
         </div>
         
         <!-- Si no hay juegos -->
-        <div th:if="${juegos.empty}" class="text-center py-5">
-            <i class="fas fa-search fa-5x text-muted mb-4"></i>
-            <h3>No se encontraron juegos</h3>
-            <p class="text-muted">Intenta con otra búsqueda</p>
+        <div th:if="${juegos.empty}" class="text-center py-16">
+            <i class="fas fa-search text-6xl text-gray-400 mb-6"></i>
+            <h3 class="text-3xl font-bold text-gray-800 mb-2">No se encontraron juegos</h3>
+            <p class="text-gray-600">Intenta con otra búsqueda</p>
         </div>
     </div>
     

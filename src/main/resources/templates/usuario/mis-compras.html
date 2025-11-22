@@ -1,61 +1,57 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head th:replace="~{fragments/header :: head('Mis Compras - Pixel Shop')}">
-    <link th:href="@{/css/usuario/mis-compras.css}" rel="stylesheet">
-</head>
-<body>
+<html xmlns:th="http://www.thymeleaf.org" class="h-full">
+<head th:replace="~{fragments/header :: head('Mis Compras - Pixel Shop')}"></head>
+<body class="min-h-screen flex flex-col bg-gray-50">
     <nav th:replace="~{fragments/header :: navbar}"></nav>
     
-    <div class="main-container my-5">
-        <div class="text-center mb-5">
-            <h1 class="display-4 fw-bold">
-                <i class="fas fa-shopping-bag text-success me-3"></i>
+    <div class="flex-grow container mx-auto px-4 py-8">
+        <div class="text-center mb-10">
+            <h1 class="text-5xl font-bold text-gray-800">
+                <i class="fas fa-shopping-bag text-green-600 mr-3"></i>
                 Mis Compras
             </h1>
-            <p class="lead text-muted">Historial completo de transacciones</p>
+            <p class="text-xl text-gray-600 mt-3">Historial completo de transacciones</p>
         </div>
         
         <!-- Tabla de compras -->
-        <div class="card shadow">
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>#ID</th>
-                                <th>Juego</th>
-                                <th>Fecha</th>
-                                <th>Precio Pagado</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr th:each="compra : ${compras}">
-                                <td th:text="${compra.id}">#1</td>
-                                <td>
-                                    <strong th:text="${compra.juego.titulo}">Título del Juego</strong>
-                                </td>
-                                <td th:text="${#temporals.format(compra.fechaCompra, 'dd/MM/yyyy HH:mm')}">01/01/2025</td>
-                                <td class="fw-bold text-success" th:text="${compra.precioPagado + '€'}">0.00€</td>
-                                <td>
-                                    <a th:href="@{/juego/{id}(id=${compra.juego.id})}" class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-eye me-1"></i>Ver
-                                    </a>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full">
+                    <thead class="bg-gray-800 text-white">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-sm font-semibold">#ID</th>
+                            <th class="px-6 py-4 text-left text-sm font-semibold">Juego</th>
+                            <th class="px-6 py-4 text-left text-sm font-semibold">Fecha</th>
+                            <th class="px-6 py-4 text-left text-sm font-semibold">Precio Pagado</th>
+                            <th class="px-6 py-4 text-left text-sm font-semibold">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        <tr th:each="compra : ${compras}" class="hover:bg-gray-50 transition">
+                            <td class="px-6 py-4 text-sm text-gray-700" th:text="${compra.id}">#1</td>
+                            <td class="px-6 py-4">
+                                <strong class="text-gray-800" th:text="${compra.juego.titulo}">Título del Juego</strong>
+                            </td>
+                            <td class="px-6 py-4 text-sm text-gray-600" th:text="${#temporals.format(compra.fechaCompra, 'dd/MM/yyyy HH:mm')}">01/01/2025</td>
+                            <td class="px-6 py-4 text-lg font-bold text-green-600" th:text="${compra.precioPagado + '€'}">0.00€</td>
+                            <td class="px-6 py-4">
+                                <a th:href="@{/juego/{id}(id=${compra.juego.id})}" class="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-sm font-semibold">
+                                    <i class="fas fa-eye mr-1"></i>Ver
+                                </a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
         
         <!-- Si no hay compras -->
-        <div th:if="${compras.empty}" class="text-center py-5">
-            <i class="fas fa-receipt fa-5x text-muted mb-4"></i>
-            <h3>No tienes compras aún</h3>
-            <p class="text-muted mb-4">Tu historial aparecerá aquí</p>
-            <a th:href="@{/}" class="btn btn-primary btn-lg">
-                <i class="fas fa-shopping-cart me-2"></i>Ir al Catálogo
+        <div th:if="${compras.empty}" class="text-center py-16">
+            <i class="fas fa-receipt text-6xl text-gray-400 mb-6"></i>
+            <h3 class="text-3xl font-bold text-gray-800 mb-2">No tienes compras aún</h3>
+            <p class="text-gray-600 mb-6">Tu historial aparecerá aquí</p>
+            <a th:href="@{/}" class="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-lg font-semibold">
+                <i class="fas fa-shopping-cart mr-2"></i>Ir al Catálogo
             </a>
         </div>
     </div>
